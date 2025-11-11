@@ -6,7 +6,7 @@ load_dotenv()
 
 client = MongoClient(os.getenv('MONGODB_AGENTFACTS_URI'))
 db = client['nanda_agentfacts']
-collection = db['agents']
+collection = db['agents']  # type: ignore
 
 # Test the exact query that's failing
 results = list(collection.find(

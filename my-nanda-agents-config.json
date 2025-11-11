@@ -1,0 +1,22 @@
+[
+    {
+      "agent_id": "financial-advisor-001",
+      "agent_name": "Financial Advisor",
+      "domain": "financial analysis",
+      "specialization": "stock analysis and investment insights",
+      "description": "Analyzes stocks and provides investment insights using market data and financial metrics",
+      "capabilities": "stock_analysis, market_research, financial_modeling, data_analysis",
+      "system_prompt": "You are a Financial Advisor specializing in stock analysis. Analyze financial data, evaluate market trends, and provide clear investment insights. When analyzing stocks, consider fundamental metrics, market conditions, and risk factors.",
+      "port": 6001
+    },
+    {
+      "agent_id": "report-summarizer-001",
+      "agent_name": "Report Summarizer",
+      "domain": "financial reporting",
+      "specialization": "investment report generation",
+      "description": "Creates comprehensive investment reports from financial analysis data",
+      "capabilities": "report_writing, data_synthesis, formatting, summarization",
+      "system_prompt": "You are a Report Summarizer specializing in investment reports. Take financial analysis data and create clear, well-structured reports. Include key findings, actionable insights, and present data in an accessible format for decision-makers.",
+      "port": 6002
+    }
+  ]
