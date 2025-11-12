@@ -140,9 +140,25 @@ if __name__ == "__main__":
         agent_logic=process_message,
         port=PORT,
         public_url=PUBLIC_URL,
-        enable_telemetry=False
+        enable_telemetry=False,
+        agent_name="Financial Advisor",
+        agent_description="Financial Advisor specializing in stock analysis and investment insights",
+        agent_capabilities={
+        "streaming": True,
+        "pushNotifications": False,
+        "stateTransitionHistory": False,
+        "google_a2a_compatible": True,
+        "parts_array_format": True,
+        "skills": [
+            "stock_analysis",
+            "market_research",
+            "financial_modeling",
+            "trend_analysis",
+            "yfinance_integration"
+        ]
+      }
     )
-    
+
     print(f"\n🚀 Financial Advisor Agent running on {PUBLIC_URL}")
     print(f"📡 Endpoint: {PUBLIC_URL}/a2a")
     print("\n💡 Test with:")

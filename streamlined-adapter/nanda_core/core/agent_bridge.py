@@ -25,9 +25,12 @@ class SimpleAgentBridge(A2AServer):
                  agent_logic: Callable[[str, str], str],
                  registry_url: Optional[str] = None,
                  telemetry = None,
-                 public_url: Optional[str] = None):
+                 public_url: Optional[str] = None, 
+                 name = None,
+                 description = None,
+                 capabilities = None):
         # Pass through URL to the A2A server so it can build the default agent card
-        super().__init__(url=public_url)  # type: ignore[arg-type]
+        super().__init__(url=public_url,name = name or 'A2A Agent',description = description or 'A2A Agent', capabilities = capabilities or {})  # type: ignore[arg-type]
         self.agent_id = agent_id
         self.agent_logic = agent_logic
         self.registry_url = registry_url

@@ -23,7 +23,10 @@ class NANDA:
                  registry_url: Optional[str] = None,
                  public_url: Optional[str] = None,
                  host: str = "0.0.0.0",
-                 enable_telemetry: bool = True):
+                 enable_telemetry: bool = True,
+                 agent_name: Optional[str] = None,
+                 agent_description: Optional[str] = None,
+                 agent_capabilities: Optional[dict] = None):
         """
         Create a simple NANDA agent
         
@@ -44,6 +47,9 @@ class NANDA:
         self.public_url = public_url or f"http://localhost:{port}"
         self.host = host
         self.enable_telemetry = enable_telemetry
+        self.agent_name = agent_name
+        self.agent_description = agent_description
+        self.agent_capabilities = agent_capabilities
         
         # Initialize telemetry if enabled
         self.telemetry = None
@@ -55,14 +61,24 @@ class NANDA:
             except ImportError:
                 print(f"⚠️ Telemetry requested but module not available")
         
+
         # Create the bridge with optional features
+
+# Extract metadata for agent card
+        agent_name = getattr(self, 'agent_name', agent_id)
+        agent_description = getattr(self, 'agent_description', 'A2A-compatible agent')
+        agent_capabilities = getattr(self, 'agent_capabilities', {})
+
         self.bridge = SimpleAgentBridge(
             agent_id=agent_id,
             agent_logic=agent_logic,
             registry_url=registry_url,
             telemetry=self.telemetry,
-            public_url=self.public_url
-        )
+            public_url=self.public_url,
+            name=agent_name or agent_id,
+            description=agent_description or 'A2A-compatible agent',
+            capabilities=agent_capabilities or {}
+)
         
         print(f"🤖 NANDA Agent '{agent_id}' created")
         if registry_url:

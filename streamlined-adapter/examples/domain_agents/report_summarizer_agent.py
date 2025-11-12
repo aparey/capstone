@@ -212,7 +212,7 @@ if __name__ == "__main__":
     # Configuration
     AGENT_ID = "report-summarizer-001"
     PORT = 6002
-    PUBLIC_URL = os.getenv("PUBLIC_URL_SUMMARIZER", f"http://localhost:{PORT}")
+    PUBLIC_URL = os.getenv("PUBLIC_URL", f"http://localhost:{PORT}")
     
     print("📝 Starting Report Summarizer Agent...")
     print(f"   Agent ID: {AGENT_ID}")
@@ -227,8 +227,24 @@ if __name__ == "__main__":
         agent_logic=process_message,
         port=PORT,
         public_url=PUBLIC_URL,
-        enable_telemetry=False
-    )
+        enable_telemetry=False,
+        agent_name="Report Summarizer",
+        agent_description="Investment report generator that creates comprehensive reports from financial analysis",
+        agent_capabilities={
+        "streaming": True,
+        "pushNotifications": False,
+        "stateTransitionHistory": False,
+        "google_a2a_compatible": True,
+        "parts_array_format": True,
+        "skills": [
+            "report_generation",
+            "data_synthesis",
+            "investment_recommendations",
+            "financial_formatting",
+            "agent_coordination"
+        ]
+    }
+)
     
     print(f"\n🚀 Report Summarizer Agent running on {PUBLIC_URL}")
     print(f"📡 Endpoint: {PUBLIC_URL}/a2a")
