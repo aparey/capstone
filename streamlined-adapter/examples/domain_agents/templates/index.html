@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NANDA - Intelligent Investment Advisor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        .status.online {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.user {
+            text-align: right;
+        }
+        
+        .message.agent {
+            text-align: left;
+        }
+        
+        .message-content {
+            display: inline-block;
+            padding: 15px 20px;
+            border-radius: 15px;
+            max-width: 80%;
+            text-align: left;
+        }
+        
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .message.agent .message-content {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .message-content pre {
+            background: rgba(0,0,0,0.05);
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        .timestamp {
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+        
+        .input-area input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .input-area input:focus {
+            border-color: #667eea;
+        }
+        
+        .input-area button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .input-area button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .input-area button:active {
+            transform: translateY(0);
+        }
+        
+        .input-area button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+        
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        
+        .examples {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .examples h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+        
+        .example-query {
+            background: white;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            color: #666;
+            transition: all 0.2s;
+        }
+        
+        .example-query:hover {
+            background: #667eea;
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .tool-call {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .tool-call strong {
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 NANDA Investment Advisor</h1>
+            <p>AI-Powered Financial Analysis with Natural Language</p>
+            <div class="status" id="agentStatus">
+                <span id="statusText">Checking agent status...</span>
+            </div>
+        </div>
+        
+        <div class="chat-container">
+            <div class="examples">
+                <h3>💡 Example Queries (Click to try):</h3>
+                <div class="example-query" onclick="setQuery(this.textContent)">What's the current price of Tesla stock?</div>
+                <div class="example-query" onclick="setQuery(this.textContent)">Compare Apple, Microsoft, and Google performance over 6 months</div>
+                <div class="example-query" onclick="setQuery(this.textContent)">Should I invest in NVIDIA today?</div>
+                <div class="example-query" onclick="setQuery(this.textContent)">I have $10,000 to invest in tech stocks. What should I buy?</div>
+            </div>
+            
+            <div class="messages" id="messages">
+                <div class="message agent">
+                    <div class="message-content">
+                        <strong>👋 Welcome!</strong><br><br>
+                        I'm your AI investment advisor powered by Claude. I can analyze stocks, compare investments, and provide recommendations using real-time market data.<br><br>
+                        Ask me anything about stocks in natural language - no special commands needed!
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <input 
+                    type="text" 
+                    id="userInput" 
+                    placeholder="Ask me about stocks... (e.g., 'What's Apple's stock price?')"
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button onclick="sendMessage()" id="sendBtn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let conversationId = `web-${Date.now()}`;
+        
+        // Check agent status on load
+        async function checkAgentStatus() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                const statusEl = document.getElementById('agentStatus');
+                const statusText = document.getElementById('statusText');
+                
+                if (data.agent_healthy) {
+                    statusEl.className = 'status online';
+                    statusText.textContent = '✅ Agent Online';
+                } else {
+                    statusEl.className = 'status offline';
+                    statusText.textContent = '❌ Agent Offline';
+                }
+            } catch (error) {
+                const statusEl = document.getElementById('agentStatus');
+                const statusText = document.getElementById('statusText');
+                statusEl.className = 'status offline';
+                statusText.textContent = '❌ Cannot reach agent';
+            }
+        }
+        
+        checkAgentStatus();
+        setInterval(checkAgentStatus, 30000); // Check every 30s
+        
+        function setQuery(text) {
+            document.getElementById('userInput').value = text;
+            document.getElementById('userInput').focus();
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Clear input
+            input.value = '';
+            
+            // Disable send button
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Thinking...';
+            
+            // Add user message to chat
+            addMessage('user', message);
+            
+            // Show loading
+            const loadingId = addMessage('agent', '<div class="loading">Agent is thinking and analyzing data</div>');
+            
+            try {
+                const response = await fetch('/api/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        conversation_id: conversationId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Remove loading message
+                document.getElementById(loadingId).remove();
+                
+                if (data.success) {
+                    addMessage('agent', formatResponse(data.response));
+                } else {
+                    addMessage('agent', `❌ Error: ${data.error}`);
+                }
+                
+            } catch (error) {
+                document.getElementById(loadingId).remove();
+                addMessage('agent', `❌ Error: ${error.message}`);
+            } finally {
+                // Re-enable send button
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send';
+            }
+        }
+        
+        function addMessage(role, content) {
+            const messagesDiv = document.getElementById('messages');
+            const messageId = `msg-${Date.now()}`;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            messageDiv.id = messageId;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = content;
+            
+            const timestamp = document.createElement('div');
+            timestamp.className = 'timestamp';
+            timestamp.textContent = new Date().toLocaleTimeString();
+            
+            messageDiv.appendChild(contentDiv);
+            messageDiv.appendChild(timestamp);
+            messagesDiv.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            
+            return messageId;
+        }
+        
+        function formatResponse(text) {
+            // Format the agent response nicely
+            let formatted = text.replace(/\[intelligent-report-agent\]/g, '');
+            
+            // Convert markdown-style formatting
+            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            formatted = formatted.replace(/\n\n/g, '<br><br>');
+            formatted = formatted.replace(/\n/g, '<br>');
+            
+            // Highlight numbers and percentages
+            formatted = formatted.replace(/(\$[\d,]+\.?\d*)/g, '<strong style="color: #28a745;">$1</strong>');
+            formatted = formatted.replace(/([+-]?\d+\.?\d*%)/g, '<strong style="color: #007bff;">$1</strong>');
+            
+            return formatted;
+        }
+    </script>
+</body>
+</html>
