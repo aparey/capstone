@@ -8,9 +8,11 @@ Claude can call yfinance tools as needed based on natural language queries.
 
 import os
 import sys
+from datetime import datetime
 from dotenv import load_dotenv
 import anthropic
 import json
+import requests as requests
 
 # Add parent directory to path to import nanda_core
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -32,13 +34,48 @@ print(f"🔑 API Key loaded: {os.getenv('ANTHROPIC_API_KEY')[:20]}...")
 # Initialize Anthropic client
 client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
 
+def call_risk_assessment_agent(stock_data: dict) -> str:
+    """
+    Call the Risk Assessment Agent via A2A protocol.
+    
+    Args:
+        stock_data: Stock information to assess
+    
+    Returns:
+        Risk assessment response from the specialist agent
+    """
+    RISK_AGENT_URL = os.getenv("RISK_AGENT_URL", "http://localhost:6004")
+    
+    try:
+        response = requests.post(
+            f"{RISK_AGENT_URL}/a2a",
+            json={
+                "content": {
+                    "text": json.dumps(stock_data, indent=2),
+                    "type": "text"
+                },
+                "role": "user",
+                "conversation_id": f"risk-{datetime.now().timestamp()}"
+            },
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            return data['parts'][0]['text']
+        else:
+            return f"Risk agent unavailable (status {response.status_code})"
+            
+    except Exception as e:
+        return f"Could not reach risk assessment agent: {str(e)}"
+
 # Tool function mapping
 TOOL_FUNCTIONS = {
     "get_stock_info": get_stock_info,
     "get_historical_prices": get_historical_prices,
-    "compare_stocks": compare_stocks
+    "compare_stocks": compare_stocks,
+    "call_risk_assessment_agent": call_risk_assessment_agent
 }
-
 
 def process_message_with_tools(message: str, conversation_id: str) -> str:
     """
@@ -51,17 +88,20 @@ def process_message_with_tools(message: str, conversation_id: str) -> str:
     # System prompt for the intelligent agent
     system_prompt = """You are an expert financial investment advisor and analyst. 
 
-You have access to real-time stock market data through tools. When users ask about stocks, investments, or market analysis:
+You have access to real-time stock market data through tools AND a specialized Risk Assessment Agent. When users ask about stocks, investments, or market analysis:
 
-1. Use the available tools to fetch relevant data
-2. Analyze the data comprehensively
-3. Provide clear, actionable investment insights
-4. Include risk assessments when appropriate
-5. Give specific recommendations with reasoning
+1. Use the available tools to fetch relevant stock data
+2. For investment decisions, ALWAYS consult the Risk Assessment Agent using assess_investment_risk
+3. Analyze the data comprehensively including risk factors
+4. Provide clear, actionable investment insights
+5. Include risk assessments in your recommendations
+6. Give specific recommendations with reasoning
 
-Always be helpful, accurate, and professional. If you need stock data, use the tools available to you.
+The Risk Assessment Agent is a specialist - use it whenever evaluating investment decisions or recommendations.
 
-IMPORTANT: Include a disclaimer that this is for educational purposes only and not professional financial advice."""
+Always be helpful, accurate, and professional.
+
+IMPORTANT: Include a disclaimer that this is for educational purposes only and not professional financial advice. Please consult with a qualified financial advisor before making any investment decisions."""
 
     # Start conversation with Claude
     messages = [{"role": "user", "content": message}]
